@@ -1,46 +1,210 @@
 # 🎬 Movie Recommendation System
 
-An end-to-end Machine Learning project using Collaborative Filtering to predict movie ratings and suggest Top-N recommendations.
+An end-to-end Movie Recommendation System using **Item-Based Collaborative Filtering** on the [MovieLens Latest Small](https://www.kaggle.com/datasets/grouplens/movielens-latest-small) dataset.
 
-## 🚀 Overview
-This project implements a recommendation engine based on the MovieLens dataset. It compares three different algorithms and provides a production-ready inference script.
+This project demonstrates:
 
-### Key Features
-- **Algorithm Comparison**: User-Based CF, Item-Based CF, and Matrix Factorization (SVD).
-- **Cold-Start Handling**: Implements global and movie-index averages for new users/items.
-- **Top-N Recommendations**: Automatically suggests the best movies for a given user.
-- **Packaged Model**: Pre-trained similarity matrices for instant predictions.
+* Data preprocessing and EDA
+* Training and comparing recommendation algorithms
+* Saving reusable model artifacts
+* Serving predictions via a **Streamlit dashboard**
 
-## 📁 Project Structure
-- `recommendation_system.ipynb`: Full research and EDA notebook.
-- `ratings.csv`: The dataset containing user interactions.
-- `best_model.joblib`: The saved similarity matrix.
-- `preprocessor.joblib`: The saved ID mappings and baselines.
-- `inference.py`: Python script for making predictions and getting recommendations.
-- `report.txt`: A simple summary of the project results.
+> **Note:** The large model artifact files (`best_model.joblib`, `preprocessor.joblib`) are **not committed** to this repository due to size constraints. See [Model Artifacts](#-model-artifacts-important) for details.
 
-## 🛠️ How to Run
+---
 
-### 1. Installation
-Ensure you have the required libraries:
-```bash
-pip install pandas numpy scikit-learn joblib matplotlib seaborn
+## ✨ Features
+
+* **Item-Based Collaborative Filtering** recommender
+* Top‑N recommendations for any user in the dataset
+* Single user–movie rating prediction
+* Exploration of similar movies (based on rating patterns)
+* Clean, multi-tab Streamlit UI:
+
+  * Recommendations
+  * Predict Rating
+  * Similar Movies
+* Modular inference (`inference.py`) separated from training logic
+
+---
+
+## 🧠 High-Level Approach
+
+The system uses **Item-Based Collaborative Filtering**:
+
+1. Builds a **user–item rating matrix** from `ratings.csv`
+2. Computes **movie–movie similarity** using cosine similarity:
+
+   * Each movie is represented by its vector of user ratings
+3. To predict a user’s rating for an unseen movie:
+
+   * Looks at movies that the user has already rated
+   * Weighs those ratings by similarity to the target movie
+   * Computes a similarity‑weighted average
+   * Falls back to the movie’s average rating or the global mean for cold‑start
+
+The final deployed model is the **Item-Based CF** model (chosen based on RMSE/MAE).
+
+---
+
+## 🗂️ Project Structure
+
+```text
+.
+├── app.py                    # Streamlit dashboard
+├── inference.py              # Inference functions (load model, predict, recommend)
+├── recommendation_system.py  # Training & evaluation script (or notebook)
+├── ratings.csv               # User–movie ratings (MovieLens)
+├── movies.csv                # Movie metadata: movieId, title, genres
+├── report.txt                # Short technical report
+├── .streamlit/
+│   └── config.toml           # (Optional) Streamlit theme configuration
+└── README.md                 # Project documentation (this file)
 ```
 
-### 2. Training (Optional)
-If you want to re-train the model or update the similarity matrices:
+**Expected but NOT tracked in this repo (see below):**
+
+* `best_model.joblib`
+* `preprocessor.joblib`
+* 📊 Data (`ratings.csv`, `movies.csv`)
+
+**Data Details:**
+
+* `ratings.csv` – Columns: `userId`, `movieId`, `rating`, `timestamp`
+  Used to build the user–item matrix and train/evaluate models.
+
+* `movies.csv` – Columns: `movieId`, `title`, `genres`
+  Used for displaying movie titles & genres in the UI.
+
+Dataset source: **MovieLens Latest Small**
+
+---
+
+## 🛠️ Tech Stack
+
+* **Language:** Python 3.x
+* **Libraries:**
+  `pandas`, `numpy`, `scikit-learn` (cosine similarity, metrics), `joblib` (model persistence),
+  `matplotlib`, `seaborn` (EDA/plots), `streamlit` (web dashboard)
+
+---
+
+## ⚙️ Installation
+
+Clone this repository:
+
 ```bash
-python save_artifacts.py
+git clone https://github.com/<your-username>/<your-repo-name>.git
+cd <your-repo-name>
 ```
 
-### 3. Making Predictions
-To get recommendations for a user (e.g., User ID 1):
+(Optional but recommended) Create and activate a virtual environment:
+
+```bash
+python -m venv venv
+venv\Scripts\activate        # on Windows
+# source venv/bin/activate   # on macOS / Linux
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+If `requirements.txt` is not provided, install manually:
+
+```bash
+pip install pandas numpy scikit-learn joblib matplotlib seaborn streamlit
+```
+
+---
+
+## 📦 Model Artifacts (Important)
+
+The following files are **not included** in this GitHub repository because they are large binary artifacts:
+
+* `best_model.joblib`
+* `preprocessor.joblib`
+
+These are generated by the training script and are required for inference and the Streamlit app.
+
+---
+
+## 🔍 Command-Line Inference
+
+Test the core model logic via the command line:
+
 ```bash
 python inference.py
 ```
 
-## 📊 Results
-The **Item-Based Collaborative Filtering** model performed best with an **RMSE of 0.92**, proving to be both accurate and stable for this dataset.
+This will:
+
+* Load `preprocessor.joblib` and `best_model.joblib`
+* Predict a sample rating for a given `(user_id, movie_id)`
+* Print the Top‑5 recommendations for a sample user
+
+**Key functions in `inference.py`:**
+
+* `load_recommender()` – Loads preprocessor and model artifacts; computes `movie_averages` if needed.
+* `predict_rating(user_id, movie_id, preprocessor, model)` – Predicts a rating for a specific user–movie pair.
+* `get_recommendations(user_id, preprocessor, model, n=5)` – Returns Top‑N recommended movies as `(movieId, predicted_score)` pairs.
 
 ---
-*Created by Moiz Mansoori during the ML Internship.*
+
+## 🌐 Streamlit Dashboard
+
+The main user interface is built in `app.py`.
+
+**Run the App:**
+
+```bash
+streamlit run app.py
+```
+
+This will start a local web server and display a URL (typically `http://localhost:8501`).
+
+**App Features:**
+
+### 📌 Recommendations
+
+* Select a User ID
+* Choose the number of recommendations (Top‑N)
+* View a table of recommended movies with:
+
+  * `movieId`, `title`, `genres`, Predicted rating
+* Expand “Rating history for User X” to see what that user has already rated.
+
+### ⭐ Predict Rating
+
+* Select a User ID and a Movie Title
+* Get the predicted rating (0.5 to 5.0) for that specific user–movie pair.
+
+### 🎞 Similar Movies
+
+* Select a reference movie
+* View a list of movies most similar to it (according to rating patterns), with similarity scores, titles, and genres.
+
+**Optional:** Custom theme via `.streamlit/config.toml`.
+
+---
+
+## 📈 Model Performance (From Training)
+
+During training and evaluation (see `recommendation_system.py` or notebook):
+
+* **Models Compared:**
+
+  * User‑Based Collaborative Filtering
+  * Item‑Based Collaborative Filtering
+  * Matrix Factorization (SVD)
+
+* **Best Performance:** Item‑Based Collaborative Filtering
+
+  * RMSE ≈ 0.92
+  * Chosen due to:
+
+    * Good predictive accuracy
+    * Stability
+    * Interpretability (recommendations based on similar movies)
