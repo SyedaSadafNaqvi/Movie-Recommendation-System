@@ -208,6 +208,13 @@ During training and evaluation (see `recommendation_system.py` or notebook):
     * Good predictive accuracy
     * Stability
     * Interpretability (recommendations based on similar movies)
-      
+
+## Team Members
+- [@khizardev123](https://github.com/khizardev123)
+- [@mirza1272](https://github.com/mirza1272)
+- [@AdanAli951](https://github.com/AdanAli951)
+- [@moiz-mansoori](https://github.com/moiz-mansoori)
+- [@MuhammadMusabYaqoob](https://github.com/MuhammadMusabYaqoob)
+  
 ## Conclusion
 This project delivers a complete movie recommendation system based on Item‑Based Collaborative Filtering using the MovieLens dataset. After comparing multiple approaches, the item‑based model was chosen for its strong accuracy and stability (RMSE ≈ 0.92). The final solution includes a reusable inference pipeline and a Streamlit dashboard, meeting the internship goals of building, evaluating, and deploying a practical, data‑driven recommendation system.
